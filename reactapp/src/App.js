@@ -24,7 +24,7 @@ function App() {
                 '& .MuiDrawer-paper': { width: drawerWidth, bgcolor: '#FDF4F5' }
             }}>
                 <Toolbar sx={{ bgcolor: '#6D5D6E' }} >
-                    <span style={{ display: 'flex', direction: 'row' }}>
+                    <span className='flex-row-div'>
                         <DiamondIcon color='disabled' fontSize='large' />
                         <h4 style={{ margin: 0, paddingLeft: 10, display: 'flex', alignItems: 'center' }}>TEST TODO</h4>
                     </span>

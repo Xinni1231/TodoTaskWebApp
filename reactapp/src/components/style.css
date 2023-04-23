@@ -1,0 +1,9 @@
+.flex-row-div{
+    direction: row;
+    display: flex;
+    align-items: center;
+}
+
+/*
+TODO : standardize css in each js
+*/

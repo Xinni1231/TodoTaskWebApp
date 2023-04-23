@@ -1,10 +1,11 @@
 import { FormControlLabel, Radio, Typography, Checkbox, Chip } from "@mui/material";
 import React, { useState } from 'react';
+import './style.css';
 
 export const CommonRadioForm = ({ ikey, ivalue, chips }) => {
     return (<FormControlLabel value={ikey} control={<Radio size='small' />}
         label={
-            <div style={{ direction: 'row', display: 'flex' }}>
+            <div className='flex-row-div'>
                 <Typography fontSize={'13px'} sx={{ marginRight: '5px' }}>{ivalue}</Typography>
                 {
                     chips && Object.entries(chips).map(([key, value]) => {

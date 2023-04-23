@@ -6,6 +6,7 @@ import * as actions from '../actions/actionTodo';
 import { useForm } from './FormComponent';
 import moment from 'moment/moment';
 import "../App.css"
+import './style.css';
 
 const initialFieldValues = {
     name: '',

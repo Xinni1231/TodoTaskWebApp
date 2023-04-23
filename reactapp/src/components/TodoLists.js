@@ -9,6 +9,7 @@ import { CommonCheckboxForm, CommonRadioForm } from './FormComponent';
 import { TodoForm } from './TodoForm';
 import TodoNode from './TodoNode';
 import EventIcon from '@mui/icons-material/Event';
+import './style.css';
 
 export const statusMapTable = {
     1: { name: "Not Started", bgcolor: "#FFDEDE", color: "black" },
@@ -137,7 +138,7 @@ const TodoList = (props) => {
                     <FormControl sx={{ margin: '10px', width: '200px' }} >
                         <Typography sx={{ fontSize: '15px', fontWeight: 'semibold' }}>Due within <b style={{ color: 'darkblue' }}>{dueValue}</b> day(s)</Typography>
                         <FormGroup sx={{ marginInline: '10px', marginTop: '10px' }}>
-                            <div style={{ display: 'flex', direction: 'row', alignItems: 'center' }}>
+                            <div className='flex-row-div'>
                                 <EventIcon color='primary' fontSize='small' style={{ display: "flex", alignItems: "center" }} />
                                 <Slider sx={{ marginInline: '10px' }} size='small'
                                     defaultValue={10} step={1} min={1} max={365} onChange={handleSliderChange}
