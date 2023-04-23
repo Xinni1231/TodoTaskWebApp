@@ -31,8 +31,10 @@ namespace webapi.Controllers
                 return NotFound();
             }
 
-            List<string> filter_queries = new List<string>();
-            string sql_query = String.Empty;
+            DateTime datetime = DateTime.UtcNow;
+            int default_duedays = 365;
+            int default_status = 7;
+            int default_priority = 7;
 
             // filtered query
             var filter = filters.Split("_");
@@ -50,19 +52,19 @@ namespace webapi.Controllers
                             case "duedate":
                                 if (int.TryParse(tokens[1], out val) && val >= 0)
                                 {
-                                    filter_queries.Add($"DATEDIFF(day, DateCreated, DueDate) <= {val}");
+                                    default_duedays = val;
                                 }
                                 break;
                             case "status":
                                 if (int.TryParse(tokens[1], out val) && val >= 0)
                                 {
-                                    filter_queries.Add($"Status & {val} > 0");
+                                    default_status = val;
                                 }
                                 break;
                             case "priority":
                                 if (int.TryParse(tokens[1], out val) && val >= 0)
                                 {
-                                    filter_queries.Add($"Priority & {val} > 0");
+                                    default_priority = val;
                                 }
                                 break;
                             default:
@@ -72,48 +74,38 @@ namespace webapi.Controllers
                 }
             }
 
-            int count = filter_queries.Count;
-            if (count > 0)
-            {
-                sql_query += $"WHERE ";
-            }
-            for (int i = 0; i < count; i++)
-            {
-                sql_query += (i == count - 1) ? filter_queries[i] + " " : filter_queries[i] + " AND ";
-            }
+            var eItems = _context.TodoItems.Where(x => EF.Functions.DateDiffDay(datetime,x.DueDate)<= default_duedays);
 
             // sorting query
             switch (sortName)
             {
                 case "duedate_desc":
-                    sql_query += $"ORDER BY DueDate DESC";
-                    break;
-                case "duedate":
-                    sql_query += $"ORDER BY DueDate";
+                    eItems = eItems.OrderByDescending(x => x.DueDate);
                     break;
                 case "status_desc":
-                    sql_query += $"ORDER BY Status DESC";
-                    break;
-                case "status":
-                    sql_query += $"ORDER BY Status";
+                    eItems = eItems.OrderByDescending(x => x.Status);
                     break;
                 case "name_desc":
-                    sql_query += $"ORDER BY Name DESC";
-                    break;
-                case "name":
-                    sql_query += $"ORDER BY Name";
+                    eItems = eItems.OrderByDescending(x => x.Name);
                     break;
                 case "priority_desc":
-                    sql_query += $"ORDER BY Priority DESC";
+                    eItems = eItems.OrderByDescending(x => x.Priority);
+                    break;
+                case "status":
+                    eItems = eItems.OrderBy(x => x.Status);
+                    break;
+                case "name":
+                    eItems = eItems.OrderBy(x => x.Name);
                     break;
                 case "priority":
-                    sql_query += $"ORDER BY Priority";
+                    eItems = eItems.OrderBy(x => x.Priority);
                     break;
                 default:
+                    eItems = eItems.OrderBy(x => x.DueDate);
                     break;
             }
 
-            return await _context.TodoItems.FromSqlRaw($"SELECT * FROM TodoList {sql_query}").ToListAsync();
+            return await eItems.ToListAsync();
         }
 
         // GET: api/TodoItems/5
