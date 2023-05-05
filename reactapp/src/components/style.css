@@ -4,6 +4,10 @@
     align-items: center;
 }
 
+.margin-ten{
+    margin: 10px;
+}
+
 /*
 TODO : standardize css in each js
 */

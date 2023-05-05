@@ -74,7 +74,8 @@ namespace webapi.Controllers
                 }
             }
 
-            var eItems = _context.TodoItems.Where(x => EF.Functions.DateDiffDay(datetime,x.DueDate)<= default_duedays);
+            var eItems = _context.TodoItems.Where(x => EF.Functions.DateDiffDay(datetime,x.DueDate)<= default_duedays 
+            && ((int)x.Status & default_status) > 0 && ((int)x.Priority & default_priority) > 0);
 
             // sorting query
             switch (sortName)

@@ -1,22 +1,25 @@
 import ClearIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
 import EventIcon from '@mui/icons-material/Event';
-import { Button, Card, Chip, FormControl, FormControlLabel, IconButton, Popover, Tooltip, Typography } from '@mui/material';
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import * as actions from '../actions/actionTodo';
-import { statusMapTable } from './TodoLists';
-import { priorityMapTable } from './TodoLists';
 import MenuIcon from '@mui/icons-material/Menu';
 import StyleIcon from '@mui/icons-material/Style';
+import { Button, Card, Chip, FormControl, IconButton, Popover, Tooltip, Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as actions from '../actions/actionTodo';
+import { AlertDialog } from './AlertDialog';
+import { priorityMapTable, statusMapTable } from './TodoLists';
+
 const TodoNode = ({ props, setId, setOpenForm }) => {
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const { isLoading, errTitle, errMsg } = useSelector((state) => state.todoSlice);
     const dispatch = useDispatch();
     const currentDT = new Date();
     const nodeDT = new Date(props.dueDate + (props.dueDate.includes("Z") ? "" : "Z"));
     const hours = (nodeDT - currentDT) / 36e5;
     const [updateStatusAnchor, setUpdateStatusAnchor] = useState(null);
     const isUpdateStatusOpen = Boolean(updateStatusAnchor);
-
     const handlePriorityNodeColor = () => {
         switch (props.priority) {
             case 1:
@@ -68,14 +71,29 @@ const TodoNode = ({ props, setId, setOpenForm }) => {
         </Typography>)
     }
 
-    const handleDeleteTask = () => {
-        dispatch(actions.deleteTask(props.id));
+    const handleDeleteTask = (isYes) => {
+        if (isYes) {
+            dispatch(actions.deleteTask(props.id));
+            if (!isLoading) {
+                if (errTitle)
+                    enqueueSnackbar(`${errTitle}. ${errMsg}`, { variant: 'error' });
+                else
+                    enqueueSnackbar('Task successfully deleted');
+            }
+        }
+        setOpenDeleteDialog(false);
     }
 
     const handleUpdateStatus = (event) => {
         const val = { ...props, status: parseInt(event.target.name) };
         dispatch(actions.updateTask(val));
         setUpdateStatusAnchor(null);
+        if (!isLoading) {
+            if (errTitle)
+                enqueueSnackbar(`${errTitle}. ${errMsg}`, { variant: 'error' });
+            else
+                enqueueSnackbar('Status successfully updated');
+        }
     }
 
     return (<Card sx={{ width: 300, height: 410 }} elevation={3}>
@@ -90,8 +108,10 @@ const TodoNode = ({ props, setId, setOpenForm }) => {
                         }}>{props.name}</h3>
                     </Tooltip>
                     <div style={{ flex: '10%', display: "flex", alignItems: "center" }}>
-                        {(hours >= 0) && <Tooltip title={"Edit Task"}><IconButton onClick={() => { setId(props.id); setOpenForm(true); }}> <EditIcon /></IconButton></Tooltip>}
-                        <Tooltip title={"Delete Task"}><IconButton onClick={handleDeleteTask}><ClearIcon /></IconButton></Tooltip>
+                        {(hours >= 0) && <Tooltip title={"Edit Task"}><IconButton disabled={isLoading} onClick={() => { setId(props.id); setOpenForm(true); }}> <EditIcon /></IconButton></Tooltip>}
+                        <Tooltip title={"Delete Task"}><IconButton disabled={isLoading} onClick={() => { setOpenDeleteDialog(true) }}><ClearIcon /></IconButton></Tooltip>
+                        {openDeleteDialog && <AlertDialog title="Confirm Delete?"
+                            content={"Are you sure want to delete \"" + props.name + "\" ?"} action={handleDeleteTask} />}
                     </div>
                 </div>
             </div>
@@ -100,7 +120,7 @@ const TodoNode = ({ props, setId, setOpenForm }) => {
                 <span style={{ padding: '10px', flex: "90%" }}> {handleStatusChip()}  </span>
                 <div style={{ flex: '10%', display: "flex", alignItems: "center" }}>
                     <Tooltip title="Update Status">
-                        <IconButton onClick={(event) => { setUpdateStatusAnchor(event.currentTarget); }}><MenuIcon /></IconButton>
+                        <IconButton disabled={isLoading} onClick={(event) => { setUpdateStatusAnchor(event.currentTarget); }}><MenuIcon /></IconButton>
                     </Tooltip>
                     {isUpdateStatusOpen && (<Popover open={isUpdateStatusOpen} anchorEl={updateStatusAnchor}
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}

@@ -1,8 +1,9 @@
+import DiamondIcon from '@mui/icons-material/Diamond';
+import EventIcon from '@mui/icons-material/Event';
+import { AppBar, Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import React, { useState } from 'react';
 import TodoList from './components/TodoLists';
-import { AppBar, Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
-import EventIcon from '@mui/icons-material/Event';
-import DiamondIcon from '@mui/icons-material/Diamond';
+import {COLORS} from './components/colors';
 
 const drawerWidth = 200;
 
@@ -14,16 +15,16 @@ function App() {
 
     return (
         <Box display={'flex'}>
-            <AppBar position='fixed' sx={{ width: `calc(100% - ${drawerWidth}px)`, bgcolor: '#6D5D6E' }}>
+            <AppBar position='fixed' sx={{ width: `calc(100% - ${drawerWidth}px)`, bgcolor: `${COLORS.header}` }}>
                 <Toolbar>
                     <h4 >TO DO TASK</h4>
                 </Toolbar>
             </AppBar>
             <Drawer variant='permanent' sx={{
                 width: drawerWidth,
-                '& .MuiDrawer-paper': { width: drawerWidth, bgcolor: '#FDF4F5' }
+                '& .MuiDrawer-paper': { width: drawerWidth, bgcolor: `${COLORS.submenu}` }
             }}>
-                <Toolbar sx={{ bgcolor: '#6D5D6E' }} >
+                <Toolbar sx={{ bgcolor: `${COLORS.header}` }} >
                     <span className='flex-row-div'>
                         <DiamondIcon color='disabled' fontSize='large' />
                         <h4 style={{ margin: 0, paddingLeft: 10, display: 'flex', alignItems: 'center' }}>TEST TODO</h4>

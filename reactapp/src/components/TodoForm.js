@@ -1,12 +1,15 @@
 import { Box, Button, FormHelperText, MenuItem, Select, TextField } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers';
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import moment from 'moment/moment';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import "../App.css";
 import * as actions from '../actions/actionTodo';
 import { useForm } from './FormComponent';
-import moment from 'moment/moment';
-import "../App.css"
 import './style.css';
+import { enqueueSnackbar } from 'notistack';
+import { LoadingButton } from '@mui/lab';
+import { performTodoAction } from '../reducers/todoSlice';
 
 const initialFieldValues = {
     name: '',
@@ -19,7 +22,7 @@ const initialFieldValues = {
 
 export const TodoForm = ({ selectedId, isOpenForm }) => {
     const priorityMap = { 1: "Low", 2: "Medium", 4: "High" }
-    const [val, setVal] = useState(selectedId);
+    const { isLoading, errTitle, errMsg } = useSelector((state) => state.todoSlice);
     const dispatch = useDispatch();
     const errorMsg = "* This field is required."
     const validate = (fieldValues = values) => {
@@ -35,11 +38,12 @@ export const TodoForm = ({ selectedId, isOpenForm }) => {
         setErrors({
             ...temp
         })
-        if (fieldValues == values)
-            return Object.values(temp).every(x => x == "")
+        if (fieldValues === values)
+            return Object.values(temp).every(x => x === "")
     }
 
     const handleClose = () => {
+        dispatch(performTodoAction({ type: actions.ACTION_TYPES.ERR_RESET, }));
         isOpenForm(false);
     };
 
@@ -50,13 +54,29 @@ export const TodoForm = ({ selectedId, isOpenForm }) => {
                 case "Low": pval = 1; break;
                 case "Medium": pval = 2; break;
                 case "High": pval = 4; break;
+                default: break;
             }
             const newVal = { ...values, priority: pval, status: 1, dueDate: values.dueDate.toISOString() };
-            if (selectedId)
+            if (selectedId) {
                 dispatch(actions.updateTask(newVal));
-            else
+                if (errTitle) {
+                    enqueueSnackbar(`${errTitle}. ${errMsg}`, { variant: 'error' });
+                }
+                else {
+                    enqueueSnackbar('Task successfully updated');
+                    isOpenForm(false);
+                }
+            }
+            else {
                 dispatch(actions.createNew(newVal));
-            isOpenForm(false);
+                if (errTitle) {
+                    enqueueSnackbar(`${errTitle}. ${errMsg}`, { variant: 'error' });
+                }
+                else {
+                    enqueueSnackbar('Task successfully added');
+                    isOpenForm(false);
+                }
+            }
         }
     };
 
@@ -84,17 +104,19 @@ export const TodoForm = ({ selectedId, isOpenForm }) => {
     return (
         <Box component={'form'} autoComplete='off' marginInline={3} marginBottom={3}>
             <h1>To-Do Task</h1>
-            <div style={{ margin: '10px' }}>
+            <div className='margin-ten'>
                 <TextField label='Title' fullWidth name="name" value={values.name} onChange={handleInputChange}
+                    inputProps={{ maxLength: 50 }}
                     {...(errors.name && { error: `${errors.name !== ""}`, helperText: errors.name })}
                 />
             </div>
-            <div style={{ margin: '10px' }}>
+            <div className='margin-ten'>
                 <TextField label='Description' multiline minRows={4} maxRows={4} xs={7} fullWidth name="description"
+                    inputProps={{ maxLength: 500 }}
                     value={values.description} onChange={handleInputChange}
                     {...(errors.description && { error: `${errors.description !== ""}`, helperText: errors.description })} />
             </div>
-            <div style={{ margin: '10px' }}>
+            <div className='margin-ten'>
                 <Select label='Priority' sx={{ width: '120px' }} name='priority' value={values.priority}
                     onChange={handleInputChange} >
                     {Object.entries(priorityMap).map(([key, value]) => {
@@ -107,12 +129,16 @@ export const TodoForm = ({ selectedId, isOpenForm }) => {
                     name="dueDate" value={values.dueDate} maxDate={getMaxDate()}
                     onChange={(newValue) => handleDateTimeChange(newValue, "dueDate")} />
             </div>
-            <div style={{ margin: '10px' }}>
-                {errors.priority && <FormHelperText error={`${errors.priority !== ""}`}>{errors.priority}</FormHelperText>}
+            <div className='margin-ten'>
+                {errors.priorFormControlLabelity && <FormHelperText error={`${errors.priority !== ""}`}>{errors.priority}</FormHelperText>}
             </div>
             <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant='outlined' onClick={() => { handleClose(); }}>Cancel</Button>
-                <Button variant='outlined' sx={{ marginLeft: '10px' }} onClick={handleSubmitTask}>Submit</Button>
+                <Button variant='outlined' size='small' disabled={isLoading} onClick={() => { handleClose(); }}>
+                    Cancel
+                </Button>
+                <LoadingButton variant='outlined' sx={{ marginLeft: '10px', paddingInline:'30px' }} loading={isLoading} loadingIndicator="Submitting" onClick={handleSubmitTask}>
+                     Submit
+                </LoadingButton>
             </div>
         </Box >
     )

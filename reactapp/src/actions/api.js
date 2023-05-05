@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseUrl = 'https://localhost:7235/api/';
-export default {
+const exportedAPI ={
     todo(url = baseUrl + 'todoitems/') {
         return {
             fetchAll: (sortName, filters) => axios.get(url + 'ids', {
@@ -16,3 +16,5 @@ export default {
         }
     }
 }
+
+export default exportedAPI;

@@ -7,13 +7,16 @@ import { Provider } from 'react-redux';
 import { store } from './actions/store';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import { SnackbarProvider } from 'notistack';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Provider store={store}>
       <LocalizationProvider dateAdapter={AdapterMoment}>
-        <App />
+        <SnackbarProvider maxSnack={3} variant='success' autoHideDuration={5000} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+          <App />
+        </SnackbarProvider>
       </LocalizationProvider>
     </Provider>
   </React.StrictMode>

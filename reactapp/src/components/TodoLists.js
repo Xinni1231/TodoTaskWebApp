@@ -1,14 +1,14 @@
 import AddCardIcon from '@mui/icons-material/AddCard';
+import EventIcon from '@mui/icons-material/Event';
 import SortIcon from '@mui/icons-material/Sort';
 import TuneIcon from '@mui/icons-material/Tune';
-import { Button, Dialog, Divider, FormControl, FormGroup, Grid, IconButton, Popover, RadioGroup, Slider, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import { AppBar, Alert, AlertTitle, Button, Dialog, Divider, FormControl, FormGroup, Grid, IconButton, Popover, RadioGroup, Skeleton, Slider, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '../actions/actionTodo';
 import { CommonCheckboxForm, CommonRadioForm } from './FormComponent';
 import { TodoForm } from './TodoForm';
 import TodoNode from './TodoNode';
-import EventIcon from '@mui/icons-material/Event';
 import './style.css';
 
 export const statusMapTable = {
@@ -46,7 +46,7 @@ const TodoList = (props) => {
 
     const [openForm, setOpenForm] = React.useState(false);
     const [selectedId, setSelectedId] = React.useState(0);
-    const { items } = useSelector((state) => state.todoSlice);
+    const { items, isLoading, errTitle, errMsg } = useSelector((state) => state.todoSlice);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -98,7 +98,13 @@ const TodoList = (props) => {
     }
 
     return (<div>
-        <Toolbar direction='row' sx={{ bgcolor: '#ECF2FF'}}>
+        {errMsg && !openForm &&
+           <AppBar position='static'>
+             <Alert variant="filled" severity="error">
+                <AlertTitle sx={{fontWeight:'bold'}}>{errTitle}</AlertTitle>
+                {errMsg}
+            </Alert></AppBar>}
+        <Toolbar direction='row' sx={{ bgcolor: '#ECF2FF' }}>
             <Button startIcon={<AddCardIcon fontSize='large' />} sx={{ fontWeight: "bold" }} variant='outlined' onClick={() => { setSelectedId(0); setOpenForm(true); }}>
                 Create New
             </Button>
@@ -165,8 +171,17 @@ const TodoList = (props) => {
                 </Popover>)}
             </div>
         </Toolbar>
-        <Grid container spacing={4} style={{ marginLeft:0 }}>
-            {
+        <Grid container spacing={4} style={{ marginLeft: 0 }}>
+            {isLoading ?
+                [...Array(8)].map((item, index) => {
+                    return <Grid item key={`loading-${index}`}>
+                        <Stack spacing={1}>
+                            <Skeleton variant='rounded' width={300} height={50} />
+                            <Skeleton variant='rounded' width={300} height={350} />
+                        </Stack>
+                    </Grid>
+                })
+                :
                 items.map((item, index) => {
                     return (<Grid item key={index} ><TodoNode props={{ ...item }} setId={setSelectedId} setOpenForm={setOpenForm} /></Grid>)
                 })
